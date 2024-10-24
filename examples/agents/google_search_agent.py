@@ -1,12 +1,11 @@
 """A google search agent that can be used to answer current questions using Mirascope"""
 import os
 from typing import Any
-
-import requests
 from bs4 import BeautifulSoup  # type: ignore
 from openai.types.chat import ChatCompletionMessageParam
 
 from mirascope.openai import OpenAICall, OpenAICallParams
+from security import safe_requests
 
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"
 
@@ -27,7 +26,7 @@ def google_search(query: str) -> str:
     params = {"key": API_KEY, "cx": CSE_ID, "q": query}
 
     try:
-        response = requests.get(BASE_URL, params=params)
+        response = safe_requests.get(BASE_URL, params=params)
         data: dict[str, Any] = response.json()
         items: list[dict[str, Any]] = data.get("items", [])
         if items:
@@ -52,7 +51,7 @@ def parse_content(link: str) -> str:
         str: The content of the webpage, separated by a newline.
     """
     try:
-        response = requests.get(link)
+        response = safe_requests.get(link)
         soup = BeautifulSoup(response.content, "html.parser")
         paragraphs = soup.find_all("p")
         data = []
